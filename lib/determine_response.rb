@@ -1,0 +1,3 @@
+class DetermineResponse
+  
+end

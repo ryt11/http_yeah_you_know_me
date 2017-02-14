@@ -11,4 +11,13 @@ class Parser
     split.flatten(1)
   end
 
+  def get_path_requested (request_info)
+    request_info[1].include?("?") ? path = request_info[1].split("?").first : path = request_info[1]
+  end
+
+  def get_params_requested (request_info)
+    request_info[1].split("?")[1].split('=')[1]
+   #if there is not a second param and no end will it not do anything?
+  end
+
 end

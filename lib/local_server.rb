@@ -2,6 +2,7 @@ require 'socket'
 require 'pry'
 require './lib/parser'
 require './lib/path_check'
+require './lib/dictionary'
 
 class LocalServer
   attr_reader :parser, :path_string, :path_check
@@ -9,6 +10,7 @@ class LocalServer
   def initialize (port)
     @server = TCPServer.new(port)
     @parser = Parser.new
+    @running = true
     @hello_counter = 0
     @request_count = 0
     @request_lines = nil
@@ -24,10 +26,10 @@ class LocalServer
     request_lines
   end
 
-  def determine_response (path)
+  def determine_response (path) #could take this whole method and make it its' own class
     path_check = PathCheck.new(path)
     if path_check.root?
-      response = parser.debug_info(parser.split_request(@request_lines))
+      response = parser.debug_info(format_request)
     elsif path_check.shutdown?
       response = "Total requests: #{@request_count}"
     elsif path_check.hello?
@@ -36,8 +38,19 @@ class LocalServer
     elsif path_check.date_time?
       time  = DateTime.now
       response = time.strftime('%H:%M%p on %A, %B %d, %Y')
+    elsif path_check.word_search?
+      new_dict = Dictionary.new
+        if new_dict.check_dictionary(parser.get_params_requested(format_request)) #can I split this into a method later?
+          response = "Word is a known word."
+        else
+          response = "Word is not a known word."
+        end
+    elsif path_check.game?
+      #game handle
+    elsif path_check.start_game?
+      @post = true
     else
-      response = parser.debug_info(parser.split_request(@request_lines))
+      response = parser.debug_info(format_request)
     end
     response
   end
@@ -52,11 +65,15 @@ class LocalServer
     if response == "Total requests: #{@request_count}"
       @socket.puts header
       @socket.puts html_wrapper
-      exit!
+      @running = false
     else
       @socket.puts header
       @socket.puts html_wrapper
     end
+  end
+
+  def format_request
+    parser.split_request(@request_lines.flatten(1))
   end
 
   def close_stream
@@ -64,11 +81,11 @@ class LocalServer
   end
 
   def run
-    loop do
+    while @running
       @socket = @server.accept
       @request_count += 1
-      path = parser.split_request(read_request)[1]
-      send_response(determine_response(path))
+      read_request
+      send_response(determine_response(parser.get_path_requested(format_request)))
       close_stream
     end
   end

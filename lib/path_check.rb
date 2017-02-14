@@ -19,4 +19,12 @@ class PathCheck
   def shutdown?
     path == "/shutdown"
   end
+
+  def word_search?
+    path == "/wordsearch"
+  end
+
+  def game?
+    path == "/game"
+  end
 end

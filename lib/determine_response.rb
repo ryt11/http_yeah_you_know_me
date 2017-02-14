@@ -1,3 +1,0 @@
-class DetermineResponse
-  
-end

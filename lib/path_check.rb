@@ -27,4 +27,8 @@ class PathCheck
   def game?
     path == "/game"
   end
+
+  def start_game?
+    path == "/startgame"
+  end
 end

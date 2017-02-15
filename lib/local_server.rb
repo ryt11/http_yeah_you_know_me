@@ -17,7 +17,6 @@ class LocalServer
     @hello_counter = 0
     @request_count = 0
     @request_lines = nil
-    @game = nil
   end
 
 
@@ -53,13 +52,15 @@ class LocalServer
         end
     elsif path_check.game? && parser.get
       game.guess_made == true ? response = game.game_response : response = "You must make a guess."
+      parser.get = false
     elsif path_check.game? && parser.post
       game.redirect = true
-      guess_just_made = parser.get_params_requested(format_request)
-      game.record_guess(guess_just_made)
+      game.record_guess(parser.get_params_requested(format_request))
+      parser.post = false
     elsif path_check.start_game? && parser.post
       @game = Game.new
       response = "Good luck!"
+      parser.post = false
     else
       response = parser.debug_info(format_request)
     end

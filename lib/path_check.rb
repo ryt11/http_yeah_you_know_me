@@ -21,7 +21,7 @@ class PathCheck
   end
 
   def word_search?
-    path == "/wordsearch"
+    path == "/word_search"
   end
 
   def game?

@@ -31,7 +31,7 @@ class LocalServer
   end
 
 
-  def determine_response (path) #could take this whole method and make it its' own class
+  def determine_response (path)
     path_check = PathCheck.new(path)
     if path_check.root?
       response = parser.debug_info(format_request)
@@ -44,12 +44,7 @@ class LocalServer
       time  = DateTime.now
       response = time.strftime('%H:%M%p on %A, %B %d, %Y')
     elsif path_check.word_search?
-      new_dict = Dictionary.new
-        if new_dict.check_dictionary(parser.get_params_requested(format_request)) #can I split this into a method later?
-          response = "Word is a known word."
-        else
-          response = "Word is not a known word."
-        end
+      response = dictionary_response
     elsif path_check.game? && parser.get
       game.guess_made == true ? response = game.game_response : response = "You must make a guess."
       parser.get = false
@@ -101,8 +96,18 @@ class LocalServer
   end
 
 
+
   def close_stream
     @socket.close
+  end
+
+  def dictionary_response
+    new_dict = Dictionary.new
+      if new_dict.check_dictionary(parser.get_params_requested(format_request))
+         "Word is a known word."
+      else
+        "Word is not a known word."
+      end
   end
 
 

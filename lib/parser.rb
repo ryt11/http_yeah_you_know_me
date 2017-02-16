@@ -1,3 +1,4 @@
+require 'pry'
 class Parser
   attr_accessor :post, :get
   def initialize
@@ -26,7 +27,6 @@ class Parser
 
   def get_params_requested (request_info)
     request_info[1].split("?")[1].split('=')[1]
-   #if there is not a second param and no end will it not do anything?
   end
 
 end

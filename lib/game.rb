@@ -1,7 +1,7 @@
 
 
 class Game
-  attr_reader  :answer
+  attr_reader :answer
   attr_accessor :redirect, :guess_made, :current_guess, :guesses
   def initialize
     @answer = Random.rand(1..100)

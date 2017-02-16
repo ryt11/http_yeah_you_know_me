@@ -62,31 +62,43 @@ class LocalServer
     response
   end
 
+  def html_wrapper(response)
+    "<html><head><link rel='shortcut icon' href='about:blank'></head><body>#{response}</body></html>"
+  end
 
-  def send_response (response)
-    html_wrapper = "<html><head><link rel='shortcut icon' href='about:blank'></head><body>#{response}</body></html>"
-    if game != nil && game.redirect
-      header = ["http/1.1 302 Moved Permanently",
+  def response_302 (response)
+      ["http/1.1 302 Moved Permanently",
         "Location: http://127.0.0.1:2000/game",
       "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
       "server: ruby",
       "content-type: text/html; charset=iso-8859-1",
-      "content-length: #{html_wrapper.length}\r\n\r\n"]
+      "content-length: #{html_wrapper(response).length}\r\n\r\n"]
+  end
+
+  def response_200 (response)
+    ["http/1.1 200 ok",
+    "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
+    "server: ruby",
+    "content-type: text/html; charset=iso-8859-1",
+    "content-length: #{html_wrapper(response).length}\r\n\r\n"]
+  end
+
+
+  def send_response (response)
+    html_response = html_wrapper(response)
+    if game != nil && game.redirect
+      header = response_302 (response)
       game.redirect = false
     else
-      header = ["http/1.1 200 ok",
-      "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
-      "server: ruby",
-      "content-type: text/html; charset=iso-8859-1",
-      "content-length: #{html_wrapper.length}\r\n\r\n"]
+      header = response_200(response)
     end
     if response == "Total requests: #{@request_count}"
       @socket.puts header
-      @socket.puts html_wrapper
+      @socket.puts html_response
       @running = false
     else
       @socket.puts header
-      @socket.puts html_wrapper
+      @socket.puts html_response
     end
   end
 
